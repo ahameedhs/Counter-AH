@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#123d21">
+<!-- ===== Google AdSense (script included, ad units below reserve space now) ===== -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6662577935293006"
+ crossorigin="anonymous"></script>
+<style>
+  .ad-slot { width: 100%; min-height: 60px; margin: 0 auto 14px; max-width: 420px; border-radius: 10px; overflow: hidden; }
+  .ad-slot ins.adsbygoogle { width: 100%; }
+</style>
+<title>Counter AH</title>
+<style>
+  :root {
+    --bg1: #1e5631;
+    --bg2: #123d21;
+    --glow: rgba(111,255,120,0.55);
+    --neon: #6fff9e;
+    --neon-mid: #3cff78;
+    --neon-dark: #26c95c;
+    --neon-rgb: 111,255,158;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: linear-gradient(180deg, var(--bg1) 0%, var(--bg2) 100%);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    display: flex; align-items: flex-start; justify-content: center;
+    overflow-y: auto; overflow-x: hidden;
+    transition: background 0.4s ease;
+  }
+  .stage {
+    width: 100%;
+    max-width: 420px;
+    padding: 24px 18px;
+  }
+
+  /* Top bar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+    background: linear-gradient(180deg, #d9d9d9, #a8a8a8 45%, #8c8c8c);
+    border: 1px solid #6d6d6d;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.5);
+  }
+  .topbar .icon-btn {
+    font-size: 15px;
+    color: #fff;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid rgba(0,0,0,0.4);
+    box-shadow:
+      0 3px 0 rgba(0,0,0,0.35),
+      0 5px 8px rgba(0,0,0,0.3),
+      inset 0 2px 3px rgba(255,255,255,0.5);
+    transition: transform 0.05s ease, box-shadow 0.05s ease;
+  }
+  .topbar .icon-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.35), inset 0 2px 4px rgba(0,0,0,0.3);
+  }
+  .icon-btn.close-btn {
+    background: radial-gradient(circle at 35% 30%, #ff6b5c, #b30000 70%, #6b0000);
+  }
+  .icon-btn.stop-btn {
+    background: radial-gradient(circle at 35% 30%, #8c8c8c, #3a3a3a 70%, #1a1a1a);
+  }
+  .icon-btn.play-btn {
+    background: radial-gradient(circle at 35% 30%, #7fe86a, #1c7a12 70%, #0c3a08);
+  }
+  .stopwatch-bezel {
+    flex: 1;
+    border-radius: 10px;
+    padding: 4px;
+    background: linear-gradient(145deg, #6a6a6a, #3a3a3a 55%, #565656);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.25), 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .clock-display {
+    text-align: center;
+    background: #101010;
+    color: var(--neon);
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 17px;
+    letter-spacing: 1px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.85), 0 0 6px rgba(var(--neon-rgb),0.5);
+    text-shadow: 0 0 3px var(--neon), 0 0 8px var(--neon-mid), 0 0 16px var(--neon-dark);
+    transition: color 0.3s ease, text-shadow 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  /* Device body */
+  .device {
+    position: relative;
+    background: linear-gradient(135deg, #e8e8e8 0%, #c9c9c9 35%, #b0b0b0 60%, #d4d4d4 100%);
+    border: 1px solid #5a5a5a;
+    border-radius: 28px;
+    padding: 26px 22px 30px;
+    box-shadow:
+      0 18px 40px rgba(0,0,0,0.35),
+      inset 0 2px 3px rgba(255,255,255,0.6),
+      inset 0 -3px 6px rgba(0,0,0,0.15);
+  }
+
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 40px;
+    position: relative;
+    padding-right: 62px;
+    padding-left: 44px;
+  }
+  .led {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ff6b5c, #b30000 70%, #6b0000);
+    box-shadow: 0 0 8px rgba(255,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.4);
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid #5a0000;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .led:active {
+    transform: translateY(-50%) scale(0.9);
+    box-shadow: 0 0 4px rgba(255,0,0,0.5), inset 0 1px 3px rgba(0,0,0,0.5);
+  }
+  .goal-btn {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #6fc9ff, #0d6fb3 70%, #063f66);
+    box-shadow: 0 0 8px rgba(60,170,255,0.6), inset 0 1px 2px rgba(255,255,255,0.4);
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid #043a5c;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .goal-btn:active {
+    transform: translateY(-50%) scale(0.9);
+    box-shadow: 0 0 4px rgba(60,170,255,0.5), inset 0 1px 3px rgba(0,0,0,0.5);
+  }
+  .screen-bezel.goal-hit {
+    animation: goalFlash 0.5s ease-in-out 4;
+  }
+  @keyframes goalFlash {
+    0%, 100% { box-shadow: 0 8px 18px rgba(0,0,0,0.35), inset 0 1px 2px rgba(255,255,255,0.8); }
+    50% { box-shadow: 0 0 20px 6px rgba(255,214,0,0.9), inset 0 1px 2px rgba(255,255,255,0.8); }
+  }
+  .title-bezel {
+    border-radius: 10px;
+    padding: 4px;
+    background: linear-gradient(145deg, #6a6a6a, #3a3a3a 55%, #565656);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.25), 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .title {
+    font-size: 27px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    background: #101010;
+    padding: 6px 16px;
+    border-radius: 7px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+    animation: neonBlink 2.4s infinite;
+    white-space: nowrap;
+  }
+  @keyframes neonBlink {
+    0%   { color: #ff5c5c; text-shadow: 0 0 4px #ff5c5c, 0 0 10px #ff2d2d, 0 0 20px #c40000; }
+    12%  { color: #101010; text-shadow: none; }
+    18%  { color: #ff5c5c; text-shadow: 0 0 4px #ff5c5c, 0 0 10px #ff2d2d, 0 0 20px #c40000; }
+    30%  { color: #ffd94a; text-shadow: 0 0 4px #ffd94a, 0 0 10px #ffb700, 0 0 20px #b57e00; }
+    45%  { color: #3cff78; text-shadow: 0 0 4px #3cff78, 0 0 10px #26c95c, 0 0 20px #159644; }
+    60%  { color: #4ad4ff; text-shadow: 0 0 4px #4ad4ff, 0 0 10px #17a9e0, 0 0 20px #0d6c92; }
+    75%  { color: #d15cff; text-shadow: 0 0 4px #d15cff, 0 0 10px #b52dff, 0 0 20px #7a129c; }
+    88%  { color: #101010; text-shadow: none; }
+    100% { color: #ff5c5c; text-shadow: 0 0 4px #ff5c5c, 0 0 10px #ff2d2d, 0 0 20px #c40000; }
+  }
+  .live-clock-row {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .clock-bezel {
+    display: inline-block;
+    border-radius: 12px;
+    padding: 4px;
+    background: linear-gradient(145deg, #6a6a6a, #3a3a3a 55%, #565656);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.25), 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .live-clock {
+    display: inline-block;
+    background: #101010;
+    color: var(--neon);
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    font-size: 16px;
+    letter-spacing: 1.5px;
+    padding: 6px 16px;
+    border-radius: 7px;
+    box-shadow:
+      inset 0 2px 5px rgba(0,0,0,0.85),
+      0 0 6px rgba(var(--neon-rgb),0.6);
+    text-shadow:
+      0 0 3px var(--neon),
+      0 0 8px var(--neon-mid),
+      0 0 16px var(--neon-dark);
+    transition: color 0.3s ease, text-shadow 0.3s ease, box-shadow 0.3s ease;
+  }
+  .live-clock .ampm {
+    font-size: 11px;
+    margin-left: 4px;
+    opacity: 0.85;
+  }
+
+  .screen-bezel {
+    padding: 10px;
+    border-radius: 16px;
+    background: linear-gradient(145deg, #fbfbfb, #9a9a9a 55%, #cfcfcf);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.35), inset 0 1px 2px rgba(255,255,255,0.8);
+    margin-bottom: 26px;
+  }
+  .screen {
+    background: linear-gradient(180deg, #3a3a3a, #262626);
+    border: 3px solid #1a1a1a;
+    border-radius: 10px;
+    padding: 18px 10px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 0;
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.7);
+  }
+  .digit-bezel {
+    width: 22%;
+    aspect-ratio: 3 / 4;
+    border-radius: 10px;
+    padding: 4px;
+    background: linear-gradient(145deg, #6a6a6a, #3a3a3a 55%, #565656);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.25), 0 2px 4px rgba(0,0,0,0.5);
+  }
+  .digit {
+    position: relative;
+    background: linear-gradient(180deg, #2b2b2b 0%, #1c1c1c 48%, #2b2b2b 52%, #232323 100%);
+    border: 2px solid #111;
+    border-radius: 7px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+    perspective: 240px;
+  }
+  .digit::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 50%;
+    height: 2px;
+    background: rgba(0,0,0,0.6);
+    transform: translateY(-1px);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .digit-face {
+    font-size: clamp(2.2rem, 9vw, 3.4rem);
+    color: #f2f2f2;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(255,255,255,0.35);
+    display: inline-block;
+    backface-visibility: hidden;
+  }
+  .digit.spin-up .digit-face { animation: spinUp 0.32s ease; }
+  .digit.spin-down .digit-face { animation: spinDown 0.32s ease; }
+  @keyframes spinUp {
+    0%   { transform: translateY(0) rotateX(0deg); opacity: 1; }
+    45%  { transform: translateY(-70%) rotateX(70deg); opacity: 0.2; }
+    46%  { transform: translateY(70%) rotateX(-70deg); opacity: 0.2; }
+    100% { transform: translateY(0) rotateX(0deg); opacity: 1; }
+  }
+  @keyframes spinDown {
+    0%   { transform: translateY(0) rotateX(0deg); opacity: 1; }
+    45%  { transform: translateY(70%) rotateX(-70deg); opacity: 0.2; }
+    46%  { transform: translateY(-70%) rotateX(70deg); opacity: 0.2; }
+    100% { transform: translateY(0) rotateX(0deg); opacity: 1; }
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+  }
+
+  .bezel-plus {
+    flex: 1;
+    max-width: 260px;
+    padding: 8px;
+    border-radius: 50px;
+    background: linear-gradient(145deg, #fbfbfb, #9a9a9a 55%, #cfcfcf);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.35), inset 0 1px 2px rgba(255,255,255,0.8);
+  }
+  .btn-plus {
+    position: relative;
+    height: 84px;
+    border-radius: 42px;
+    background: linear-gradient(180deg, #7fe86a 0%, #3fb42b 45%, #1c7a12 100%);
+    border: 2px solid #0e4a0c;
+    box-shadow:
+      0 6px 0 #0c3a0a,
+      0 10px 16px rgba(0,0,0,0.4),
+      inset 0 3px 5px rgba(255,255,255,0.6);
+    color: #f4fff2;
+    font-size: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    overflow: hidden;
+    transition: transform 0.05s ease, box-shadow 0.05s ease;
+  }
+  .btn-plus::before {
+    content: '';
+    position: absolute;
+    top: 6%; left: 6%; right: 6%;
+    height: 38%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0));
+    border-radius: 30px;
+    pointer-events: none;
+  }
+  .btn-plus:active {
+    transform: translateY(5px);
+    box-shadow:
+      0 1px 0 #0c3a0a,
+      0 3px 6px rgba(0,0,0,0.4),
+      inset 0 3px 6px rgba(0,0,0,0.3);
+  }
+
+  .bezel-minus {
+    padding: 7px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #fbfbfb, #9a9a9a 55%, #cfcfcf);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.35), inset 0 1px 2px rgba(255,255,255,0.8);
+    flex-shrink: 0;
+  }
+  .btn-minus {
+    position: relative;
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #ffe98f 0%, #f5c419 45%, #b57e00 100%);
+    border: 2px solid #6b4f00;
+    box-shadow:
+      0 5px 0 #6b4f00,
+      0 9px 14px rgba(0,0,0,0.4),
+      inset 0 3px 5px rgba(255,255,255,0.7);
+    color: #4a3600;
+    font-size: 38px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    overflow: hidden;
+    transition: transform 0.05s ease, box-shadow 0.05s ease;
+  }
+  .btn-minus::before {
+    content: '';
+    position: absolute;
+    top: 8%; left: 10%; right: 10%;
+    height: 34%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0));
+    border-radius: 20px;
+    pointer-events: none;
+  }
+  .btn-minus:active {
+    transform: translateY(4px);
+    box-shadow:
+      0 1px 0 #6b4f00,
+      0 2px 5px rgba(0,0,0,0.4),
+      inset 0 3px 6px rgba(0,0,0,0.3);
+  }
+
+  /* Confirm modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: linear-gradient(160deg, #eeeeee, #c6c6c6 60%, #adadad);
+    border: 1px solid #6d6d6d;
+    border-radius: 16px;
+    padding: 22px 20px;
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.6);
+  }
+  .modal-box p {
+    color: #2a2a2a;
+    font-size: 17px;
+    margin: 0 0 18px;
+    font-family: 'Georgia', serif;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+  }
+  .modal-btn {
+    flex: 1;
+    padding: 10px 0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid rgba(0,0,0,0.3);
+  }
+  .modal-btn.cancel {
+    background: linear-gradient(180deg, #f2f2f2, #cfcfcf);
+    color: #333;
+  }
+  .modal-btn.confirm {
+    background: linear-gradient(180deg, #ff7a6b, #c62817);
+    color: #fff;
+  }
+  .modal-btn.confirm.blue {
+    background: linear-gradient(180deg, #6fc9ff, #0d6fb3);
+  }
+  /* Neon color picker — sits directly under the blue target button (new option, existing design untouched) */
+  .neon-fab {
+    position: absolute;
+    top: 44px;
+    right: 4px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    z-index: 70;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    background: linear-gradient(145deg, #6a6a6a, #3a3a3a 55%, #565656);
+    border: 1px solid rgba(0,0,0,0.4);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.35), inset 0 1px 2px rgba(255,255,255,0.25);
+    transition: transform 0.08s ease;
+  }
+  .neon-fab:active { transform: scale(0.9); }
+  .neon-panel {
+    position: absolute;
+    top: 70px;
+    right: 4px;
+    z-index: 70;
+    background: linear-gradient(160deg, #eeeeee, #c6c6c6 60%, #adadad);
+    border: 1px solid #6d6d6d;
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.6);
+    display: none;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .neon-panel.show { display: grid; }
+  .neon-swatch {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.7);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  }
+  .neon-swatch.active {
+    border-color: #101010;
+  }
+
+  .goal-input {
+    width: 100%;
+    font-size: 20px;
+    text-align: center;
+    padding: 8px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    border: 1px solid #6d6d6d;
+    background: #101010;
+    color: #6fff9e;
+    font-family: 'Courier New', monospace;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.7);
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="ad-slot" id="adSlotTop">
+      <ins class="adsbygoogle"
+           style="display:block; width:100%;"
+           data-ad-client="ca-pub-6662577935293006"
+           data-ad-slot="0000000004"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+    <div class="topbar">
+      <div class="icon-btn close-btn" id="closeBtn">✕</div>
+      <div class="icon-btn stop-btn" id="stopBtn">■</div>
+      <div class="stopwatch-bezel"><div class="clock-display" id="clock">00:00</div></div>
+      <div class="icon-btn play-btn" id="playBtn">▶</div>
+    </div>
+
+    <div class="device">
+      <div class="header-row">
+        <div class="led" id="resetLed" title="Reset"></div>
+        <div class="title-bezel"><div class="title">Counter AH</div></div>
+        <div class="goal-btn" id="goalBtn" title="Target"></div>
+        <div class="neon-fab" id="neonFab" title="Neon rang tabdeel karein">🎨</div>
+        <div class="neon-panel" id="neonPanel"></div>
+      </div>
+      <div class="live-clock-row">
+        <div class="clock-bezel"><div class="live-clock" id="liveClock">00:00:00</div></div>
+      </div>
+
+      <div class="screen-bezel" id="screenBezel">
+        <div class="screen">
+          <div class="digit-bezel"><div class="digit" id="d3"><span class="digit-face">0</span></div></div>
+          <div class="digit-bezel"><div class="digit" id="d2"><span class="digit-face">0</span></div></div>
+          <div class="digit-bezel"><div class="digit" id="d1"><span class="digit-face">0</span></div></div>
+          <div class="digit-bezel"><div class="digit" id="d0"><span class="digit-face">0</span></div></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="bezel-plus"><div class="btn-plus" id="plusBtn">+</div></div>
+        <div class="bezel-minus"><div class="btn-minus" id="minusBtn">−</div></div>
+      </div>
+    </div>
+
+    <div class="ad-slot" id="adSlotBottom" style="margin-top: 8px; margin-bottom: 0;">
+      <ins class="adsbygoogle"
+           style="display:block; width:100%;"
+           data-ad-client="ca-pub-6662577935293006"
+           data-ad-slot="0000000005"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <p>Counter reset karna hai?<br>Yeh 0 par wapas chala jayega.</p>
+      <div class="modal-actions">
+        <div class="modal-btn cancel" id="cancelReset">Cancel</div>
+        <div class="modal-btn confirm" id="confirmReset">Reset</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="goalModalOverlay">
+    <div class="modal-box">
+      <p>Target number set karein:</p>
+      <input type="number" class="goal-input" id="goalInput" placeholder="Jaise 50" min="1">
+      <div class="modal-actions">
+        <div class="modal-btn cancel" id="cancelGoal">Cancel</div>
+        <div class="modal-btn confirm blue" id="confirmGoal">Set</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  let count = 0;
+  let elapsedMs = 0;
+  let startTime = null;
+  let timerRunning = false;
+  let timerInterval = null;
+  let goal = null;
+
+  function buzz(pattern) {
+    if (navigator.vibrate) navigator.vibrate(pattern || 25);
+  }
+
+  const digitEls = [
+    document.getElementById('d3'),
+    document.getElementById('d2'),
+    document.getElementById('d1'),
+    document.getElementById('d0')
+  ];
+  const clock = document.getElementById('clock');
+
+  function render(direction) {
+    const str = String(Math.max(0, Math.min(9999, count))).padStart(4, '0');
+    digitEls.forEach((el, i) => {
+      const face = el.querySelector('.digit-face');
+      const newVal = str[i];
+      if (face.textContent === newVal) return;
+      const spinClass = direction === 'down' ? 'spin-down' : 'spin-up';
+      el.classList.remove('spin-up', 'spin-down');
+      // force reflow so animation restarts
+      void el.offsetWidth;
+      el.classList.add(spinClass);
+      setTimeout(() => { face.textContent = newVal; }, 145);
+      el.addEventListener('animationend', () => {
+        el.classList.remove('spin-up', 'spin-down');
+      }, { once: true });
+    });
+  }
+
+  function renderClock() {
+    const totalMs = elapsedMs;
+    const m = String(Math.floor(totalMs / 60000)).padStart(2, '0');
+    const s = String(Math.floor((totalMs % 60000) / 1000)).padStart(2, '0');
+    const cs = String(Math.floor((totalMs % 1000) / 10)).padStart(2, '0');
+    clock.textContent = `${m}:${s}.${cs}`;
+  }
+
+  document.getElementById('plusBtn').addEventListener('click', () => {
+    count++;
+    render('up');
+    buzz(25);
+    checkGoal();
+  });
+
+  document.getElementById('minusBtn').addEventListener('click', () => {
+    count = Math.max(0, count - 1);
+    render('down');
+    buzz(25);
+  });
+
+  function checkGoal() {
+    if (goal && count === goal) {
+      const bezel = document.getElementById('screenBezel');
+      bezel.classList.add('goal-hit');
+      buzz([80, 60, 80, 60, 120]);
+      setTimeout(() => bezel.classList.remove('goal-hit'), 2200);
+    }
+  }
+
+  // Reset with confirmation
+  const modalOverlay = document.getElementById('modalOverlay');
+  document.getElementById('resetLed').addEventListener('click', () => {
+    buzz(25);
+    modalOverlay.classList.add('show');
+  });
+  document.getElementById('cancelReset').addEventListener('click', () => {
+    buzz(25);
+    modalOverlay.classList.remove('show');
+  });
+  document.getElementById('confirmReset').addEventListener('click', () => {
+    buzz(40);
+    count = 0;
+    render('down');
+    modalOverlay.classList.remove('show');
+  });
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) modalOverlay.classList.remove('show');
+  });
+
+  // Goal / target setting
+  const goalModalOverlay = document.getElementById('goalModalOverlay');
+  const goalInput = document.getElementById('goalInput');
+  document.getElementById('goalBtn').addEventListener('click', () => {
+    buzz(25);
+    goalInput.value = goal || '';
+    goalModalOverlay.classList.add('show');
+  });
+  document.getElementById('cancelGoal').addEventListener('click', () => {
+    buzz(25);
+    goalModalOverlay.classList.remove('show');
+  });
+  document.getElementById('confirmGoal').addEventListener('click', () => {
+    buzz(40);
+    const val = parseInt(goalInput.value, 10);
+    goal = (val && val > 0) ? val : null;
+    goalModalOverlay.classList.remove('show');
+  });
+  goalModalOverlay.addEventListener('click', (e) => {
+    if (e.target === goalModalOverlay) goalModalOverlay.classList.remove('show');
+  });
+
+  // Live real-time clock (12-hour format with AM/PM)
+  function tickLiveClock() {
+    const now = new Date();
+    let h = now.getHours();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    if (h === 0) h = 12;
+    const hh = String(h).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('liveClock').innerHTML = `${hh}:${m}:${s}<span class="ampm">${ampm}</span>`;
+  }
+  tickLiveClock();
+  setInterval(tickLiveClock, 1000);
+
+  document.getElementById('playBtn').addEventListener('click', () => {
+    buzz(25);
+    if (timerRunning) return;
+    timerRunning = true;
+    startTime = Date.now() - elapsedMs;
+    timerInterval = setInterval(() => {
+      elapsedMs = Date.now() - startTime;
+      renderClock();
+    }, 30);
+  });
+
+  document.getElementById('stopBtn').addEventListener('click', () => {
+    buzz(25);
+    timerRunning = false;
+    clearInterval(timerInterval);
+  });
+
+  document.getElementById('closeBtn').addEventListener('click', () => {
+    buzz(25);
+    timerRunning = false;
+    clearInterval(timerInterval);
+    elapsedMs = 0;
+    renderClock();
+  });
+
+  renderClock();
+
+  // ---- Neon color picker (new option, existing design untouched) ----
+  const neonColors = [
+    { name: 'Green',  neon: '#6fff9e', mid: '#3cff78', dark: '#26c95c', rgb: '111,255,158', bg1: '#1e5631', bg2: '#123d21' },
+    { name: 'Red',    neon: '#ff6b6b', mid: '#ff3d3d', dark: '#c92626', rgb: '255,107,107', bg1: '#6b1e1e', bg2: '#4a1212' },
+    { name: 'Blue',   neon: '#6fc9ff', mid: '#3ca8ff', dark: '#0d6fb3', rgb: '111,201,255', bg1: '#123a6b', bg2: '#0c2847' },
+    { name: 'Purple', neon: '#d15cff', mid: '#b52dff', dark: '#7a129c', rgb: '209,92,255', bg1: '#3f1466', bg2: '#2a0d47' },
+    { name: 'Amber',  neon: '#ffd94a', mid: '#ffb700', dark: '#b57e00', rgb: '255,217,74', bg1: '#6b4f0a', bg2: '#4a3606' },
+    { name: 'Cyan',   neon: '#4ad4ff', mid: '#17a9e0', dark: '#0d6c92', rgb: '74,212,255', bg1: '#0d4d56', bg2: '#083338' },
+    { name: 'Pink',   neon: '#ff6fd8', mid: '#ff2db0', dark: '#c9268e', rgb: '255,111,216', bg1: '#66123f', bg2: '#470c2b' },
+    { name: 'White',  neon: '#f2f2f2', mid: '#cfcfcf', dark: '#9a9a9a', rgb: '242,242,242', bg1: '#3a3a3a', bg2: '#252525' }
+  ];
+
+  const neonFab = document.getElementById('neonFab');
+  const neonPanel = document.getElementById('neonPanel');
+  const root = document.documentElement;
+
+  neonColors.forEach((c) => {
+    const sw = document.createElement('div');
+    sw.className = 'neon-swatch';
+    sw.style.background = c.bg1;
+    sw.title = c.name;
+    if (c.name === 'Green') sw.classList.add('active');
+    sw.addEventListener('click', () => {
+      root.style.setProperty('--neon', c.neon);
+      root.style.setProperty('--neon-mid', c.mid);
+      root.style.setProperty('--neon-dark', c.dark);
+      root.style.setProperty('--neon-rgb', c.rgb);
+      root.style.setProperty('--bg1', c.bg1);
+      root.style.setProperty('--bg2', c.bg2);
+      neonPanel.querySelectorAll('.neon-swatch').forEach(s => s.classList.remove('active'));
+      sw.classList.add('active');
+      buzz(20);
+    });
+    neonPanel.appendChild(sw);
+  });
+
+  neonFab.addEventListener('click', () => {
+    buzz(20);
+    neonPanel.classList.toggle('show');
+  });
+  document.addEventListener('click', (e) => {
+    if (!neonPanel.contains(e.target) && e.target !== neonFab) {
+      neonPanel.classList.remove('show');
+    }
+  });
+</script>
+</body>
+</html>
